@@ -1,12 +1,14 @@
 from django import forms
 from django_countries.fields import CountryField
 from . import models
+from django_countries import countries
 
 
 class SearchForm(forms.Form):
 
     city = forms.CharField(initial="Anywhere")
-    country = CountryField(default="KR").formfield()
+    country = forms.ChoiceField(choices=list(countries))
+    # country = CountryField(default="KR").formfield()
     room_type = forms.ModelChoiceField(
         required=False, empty_label="Any kind", queryset=models.RoomType.objects.all()
     )

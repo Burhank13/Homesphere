@@ -137,11 +137,13 @@ MEDIA_URL = "/media/"
 
 
 # Email Configuration
-EMAIL_HOST = "smtp.mailgun.org"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = "587"
-EMAIL_HOST_USER = os.environ.get("MAILGUN_USERNAME")
-EMAIL_HOST_PASSWORD = os.environ.get("MAILGUN_PASSWORD")
-EMAIL_FROM = "airbnb-admin@sandboxeedd4ca787914755a527871dc70c08a1.mailgun.org"
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "homesphere3@gmail.com"
+EMAIL_HOST_PASSWORD = "homesphere@345"
+EMAIL_FROM = EMAIL_HOST_USER
 
 
 # Auth
