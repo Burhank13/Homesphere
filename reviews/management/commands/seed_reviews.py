@@ -1,55 +1,38 @@
-from core.management.commands.custom_command import CustomCommand
+import random
+from django.core.management.base import BaseCommand
 from django_seed import Seed
-from random import randint, choice
-from reviews.models import Review
-from rooms.models import Room
-from users.models import User
+from reviews import models as review_models
+from users import models as user_models
+from rooms import models as room_models
 
 
-class Command(CustomCommand):
-    help = "Automatically create reviews"
+class Command(BaseCommand):
+
+    help = "This command creates reviews"
 
     def add_arguments(self, parser):
-        parser.add_argument("--number", default=1, help="Number of reviews to create")
+        parser.add_argument(
+            "--number", default=2, type=int, help="How many reviews you want to create"
+        )
 
     def handle(self, *args, **options):
-        try:
-            number = int(options.get("number"))
-
-            self.stdout.write(self.style.SUCCESS("■ START CREATE REVIEWS"))
-
-            users = User.objects.all()
-            rooms = Room.objects.all()
-
-            for idx, room in enumerate(rooms):
-                seeder = Seed.seeder()
-                seeder.add_entity(
-                    Review,
-                    number,
-                    {
-                        "accuracy": lambda x: randint(0, 6),
-                        "communication": lambda x: randint(0, 6),
-                        "cleanliness": lambda x: randint(0, 6),
-                        "location": lambda x: randint(0, 6),
-                        "check_in": lambda x: randint(0, 6),
-                        "value": lambda x: randint(0, 6),
-                        "room": room,
-                        "user": lambda x: choice(users),
-                    },
-                )
-
-                self.progress_bar(
-                    idx + 1,
-                    len(rooms),
-                    prefix="■ PROGRESS",
-                    suffix="Complete",
-                    length=40,
-                )
-
-                seeder.execute()
-
-            self.stdout.write(self.style.SUCCESS("■ SUCCESS CREATE ALL REVIEWS!"))
-
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"■ {e}"))
-            self.stdout.write(self.style.ERROR("■ FAIL CREATE REVIEWS"))
+        number = options.get("number")
+        seeder = Seed.seeder()
+        users = user_models.User.objects.all()
+        rooms = room_models.Room.objects.all()
+        seeder.add_entity(
+            review_models.Review,
+            number,
+            {
+                "accuracy": lambda x: random.randint(0, 6),
+                "communication": lambda x: random.randint(0, 6),
+                "cleanliness": lambda x: random.randint(0, 6),
+                "location": lambda x: random.randint(0, 6),
+                "check_in": lambda x: random.randint(0, 6),
+                "value": lambda x: random.randint(0, 6),
+                "room": lambda x: random.choice(rooms),
+                "user": lambda x: random.choice(users),
+            },
+        )
+        seeder.execute()
+        self.stdout.write(self.style.SUCCESS(f"{number} reviews created!"))

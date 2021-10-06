@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.utils.html import mark_safe
-from .models import Room, RoomType, Amenity, Facility, HouseRule, Photo
+from . import models
 
 
-@admin.register(RoomType, Amenity, Facility, HouseRule)
+@admin.register(models.RoomType, models.Facility, models.Amenity, models.HouseRule)
 class ItemAdmin(admin.ModelAdmin):
-    """Register model classes inherited from the AbstractItem model"""
+
+    """ Item Admin Definition """
 
     list_display = ("name", "used_by")
 
@@ -13,54 +14,32 @@ class ItemAdmin(admin.ModelAdmin):
         return obj.rooms.count()
 
 
-@admin.register(Photo)
-class PhotoAdmin(admin.ModelAdmin):
-    """Register Photo model at admin panel"""
+class PhotoInline(admin.TabularInline):
 
-    list_display = ("__str__", "get_thumbnail")
-
-    def get_thumbnail(self, obj):
-        return mark_safe(f'<img width="50px" src="{obj.file.url}" />')
-
-    get_thumbnail.short_description = "Thumbnail"
+    model = models.Photo
 
 
-class PhotoInlineAdmin(admin.TabularInline):
-    """Photo model's inline admin"""
-
-    model = Photo
-
-
-@admin.register(Room)
+@admin.register(models.Room)
 class RoomAdmin(admin.ModelAdmin):
-    """Register Room model at admin panel
 
-    Filter by:
-        instant_book      : BooleanField
-        host.is_superhost : BooleanField
-        city              : CharField
-        room_type         : RoomType Model
-        amenities         : Amenity Model
-        facilities        : Facility Model
-        house_rules       : HouseRule Model
-        country           : CharField
+    """ Room Admin Definition """
 
-    Search by:
-        city              : exact
-        host.username     : startwith
-
-    Admin function :
-        count_amenities   : return amenities count
-        count_facilities  : return facilities count
-        count_house_rules : return house_rules count
-    """
-
-    inlines = (PhotoInlineAdmin,)
+    inlines = (PhotoInline,)
 
     fieldsets = (
         (
             "Basic Info",
-            {"fields": ("name", "description", "country", "address", "price")},
+            {
+                "fields": (
+                    "name",
+                    "description",
+                    "country",
+                    "city",
+                    "address",
+                    "price",
+                    "room_type",
+                )
+            },
         ),
         ("Times", {"fields": ("check_in", "check_out", "instant_book")}),
         ("Spaces", {"fields": ("guests", "beds", "bedrooms", "baths")}),
@@ -74,14 +53,11 @@ class RoomAdmin(admin.ModelAdmin):
         ("Last Details", {"fields": ("host",)}),
     )
 
-    raw_id_fields = ("host",)
-
     list_display = (
         "name",
         "country",
         "city",
         "price",
-        "address",
         "guests",
         "beds",
         "bedrooms",
@@ -93,23 +69,43 @@ class RoomAdmin(admin.ModelAdmin):
         "count_photos",
         "total_rating",
     )
+
     list_filter = (
         "instant_book",
-        "host__is_superhost",
-        "city",
+        "host__superhost",
         "room_type",
         "amenities",
         "facilities",
         "house_rules",
+        "city",
         "country",
     )
-    filter_horizontal = ("amenities", "facilities", "house_rules")
+
+    raw_id_fields = ("host",)
+
     search_fields = ("=city", "^host__username")
+
+    filter_horizontal = ("amenities", "facilities", "house_rules")
 
     def count_amenities(self, obj):
         return obj.amenities.count()
 
+    count_amenities.short_description = "Amenity Count"
+
     def count_photos(self, obj):
         return obj.photos.count()
 
-    count_photos.short_description = "Photo Count"
+    count_photos.short_description = "Photos Count"
+
+
+@admin.register(models.Photo)
+class PhotoAdmin(admin.ModelAdmin):
+
+    """ Photo Admin Definition """
+
+    list_display = ("__str__", "get_thumbnail")
+
+    def get_thumbnail(self, obj):
+        return mark_safe(f'<img width="50px" src="{obj.file.url}" />')
+
+    get_thumbnail.short_description = "Thumbnail"

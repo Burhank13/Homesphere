@@ -1,10 +1,11 @@
 from django.contrib import admin
-from reservations.models import Reservation
+from . import models
 
 
-@admin.register(Reservation)
+@admin.register(models.Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-    """Register Reservation model at admin panel"""
+
+    """ Reservation Admin Definition """
 
     list_display = (
         "room",
@@ -17,3 +18,8 @@ class ReservationAdmin(admin.ModelAdmin):
     )
 
     list_filter = ("status",)
+
+
+@admin.register(models.BookedDay)
+class BookedDayAdmin(admin.ModelAdmin):
+    list_display = ("day", "reservation")

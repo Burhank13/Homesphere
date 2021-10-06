@@ -4,23 +4,17 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = "Automatically create users"
+
+    help = "This command creates many users"
 
     def add_arguments(self, parser):
-        parser.add_argument("--number", default=1, help="Number of users to create")
+        parser.add_argument(
+            "--number", default=2, type=int, help="How many users do you want to create"
+        )
 
     def handle(self, *args, **options):
-        try:
-            number = int(options.get("number"))
-
-            self.stdout.write(self.style.SUCCESS("■ START CREATE USERS"))
-
-            seeder = Seed.seeder()
-            seeder.add_entity(User, number, {"is_staff": False, "is_superuser": False})
-            seeder.execute()
-
-            self.stdout.write(self.style.SUCCESS("■ SUCCESS CREATE ALL USERS!"))
-
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"■ {e}"))
-            self.stdout.write(self.style.ERROR("■ FAIL CREATE USERS"))
+        number = options.get("number")
+        seeder = Seed.seeder()
+        seeder.add_entity(User, number, {"is_staff": False, "is_superuser": False})
+        seeder.execute()
+        self.stdout.write(self.style.SUCCESS(f"{number} users created!"))

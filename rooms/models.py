@@ -1,25 +1,16 @@
+from django.utils import timezone
 from django.db import models
 from django.urls import reverse
 from django_countries.fields import CountryField
-from core.models import AbstractTimeStamp
+from core import models as core_models
+from cal import Calendar
 
 
-class AbstractItem(AbstractTimeStamp):
-    """Abstract Item Model
+class AbstractItem(core_models.TimeStampedModel):
 
-    Inherit:
-        AbstractTimeStamp
+    """ Abstract Item """
 
-    Fields:
-        name       : CharField
-        created_at : DateTimeField
-        updated_at : DateTimeField
-
-    Method:
-        __str__ : return name
-    """
-
-    name = models.CharField(max_length=80, unique=True)
+    name = models.CharField(max_length=80)
 
     class Meta:
         abstract = True
@@ -29,65 +20,48 @@ class AbstractItem(AbstractTimeStamp):
 
 
 class RoomType(AbstractItem):
-    """RoomType Model
 
-    Inherit:
-        AbstractItem
-    """
+    """ Roomtype Model Definition """
+
+    pass
 
     class Meta:
         verbose_name = "Room Type"
+        ordering = ["name"]
 
 
 class Amenity(AbstractItem):
-    """Amenity Model
 
-    Inherit:
-        AbstractItem
-    """
+    """ Amenity Model Definition """
+
+    pass
 
     class Meta:
         verbose_name_plural = "Amenities"
 
 
-class Facility(AbstractItem):
-    """Facility Model
-
-    Inherit:
-        AbstractItem
-    """
-
-    class Meta:
-        verbose_name_plural = "Facilities"
-
-
 class HouseRule(AbstractItem):
-    """HouseRule Model
 
-    Inherit:
-        AbstractItem
-    """
+    """ HouseRule Model Definition """
+
+    pass
 
     class Meta:
         verbose_name = "House Rule"
 
 
-class Photo(AbstractTimeStamp):
-    """Photo Model
+class Facility(AbstractItem):
 
-    Inherit:
-        AbstractTimeStamp
+    """ Facility Model Definition """
 
-    Fields:
-        caption    : CharField
-        file       : ImageField
-        room       : Room Model (1:N)
-        created_at : DateTimeField
-        updated_at : DateTimeField
+    pass
 
-    Method:
-        __str__ : return caption
-    """
+    class Meta:
+        verbose_name_plural = "Facilities"
+
+
+class Photo(core_models.TimeStampedModel):
+    """ Photo Model Definition """
 
     caption = models.CharField(max_length=80)
     file = models.ImageField(upload_to="room_photos")
@@ -97,40 +71,9 @@ class Photo(AbstractTimeStamp):
         return self.caption
 
 
-class Room(AbstractTimeStamp):
-    """Room Model
+class Room(core_models.TimeStampedModel):
 
-    Inherit:
-        AbstractTimeStamp
-
-    Fields:
-        name         : CharField
-        description  : TextField
-        country      : CountryField
-        city         : CharField
-        price        : IntegerField
-        address      : CharField
-        guests       : IntegerField
-        beds         : IntegerField
-        bedrooms     : IntegerField
-        baths        : IntegerField
-        check_in     : TimeField
-        check_out    : TimeField
-        instant_book : BooleanField
-        host         : users app User model (1:N)
-        room_type    : RoomType model (1:N)
-        amenities    : Amenity model (N:N)
-        facilities   : Facility model (N:N)
-        house_rules  : HouseRule model(N:N)
-        created_at   : DateTimeField
-        updated_at   : DateTimeField
-
-    Method:
-        __str__      : return name
-        save         : change capitalized city name and save
-        total_rating : return all reviews rating avg
-        first_photo  : return room's first photo file url
-    """
+    """ Room Model Definition """
 
     name = models.CharField(max_length=140)
     description = models.TextField()
@@ -138,7 +81,7 @@ class Room(AbstractTimeStamp):
     city = models.CharField(max_length=80)
     price = models.IntegerField()
     address = models.CharField(max_length=140)
-    guests = models.IntegerField()
+    guests = models.IntegerField(help_text="How many people will be staying?")
     beds = models.IntegerField()
     bedrooms = models.IntegerField()
     baths = models.IntegerField()
@@ -167,24 +110,31 @@ class Room(AbstractTimeStamp):
 
     def total_rating(self):
         all_reviews = self.reviews.all()
-
-        if len(all_reviews) == 0:
-            return 0
-
         all_ratings = 0
-
-        for review in all_reviews:
-            all_ratings += review.rating_average()
-
-        return round(all_ratings / len(all_reviews), 2)
+        if len(all_reviews) > 0:
+            for review in all_reviews:
+                all_ratings += review.rating_average()
+            return round(all_ratings / len(all_reviews), 2)
+        return 0
 
     def first_photo(self):
         try:
-            (photo,) = self.photos.all()[:1]
+            photo, = self.photos.all()[:1]
             return photo.file.url
-        except Exception:
+        except ValueError:
             return None
 
     def get_next_four_photos(self):
         photos = self.photos.all()[1:5]
         return photos
+
+    def get_calendars(self):
+        now = timezone.now()
+        this_year = now.year
+        this_month = now.month
+        next_month = this_month + 1
+        if this_month == 12:
+            next_month = 1
+        this_month_cal = Calendar(this_year, this_month)
+        next_month_cal = Calendar(this_year, next_month)
+        return [this_month_cal, next_month_cal]

@@ -1,19 +1,14 @@
 from django.db import models
+from . import managers
 
 
-class AbstractTimeStamp(models.Model):
-    """Abstract TimeStamp Model
+class TimeStampedModel(models.Model):
 
-    Inherit:
-        Model
+    """ Time Stamped Model """
 
-    Fields:
-        created_at : DateTimeField (UnEditable)
-        updated_at : DateTimeField (Editable)
-    """
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    objects = managers.CustomModelManager()
 
     class Meta:
         abstract = True

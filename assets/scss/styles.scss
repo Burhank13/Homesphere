@@ -2,182 +2,107 @@
 @tailwind components;
 
 .search-box {
-  transition: all 0.2s linear;
-  background: url('/static/img/search-box-icon.svg') no-repeat;
+    transition: box-shadow 0.2s linear;
 }
 
-.nav-link {
-  @apply ml-2 border-b-2 border-white h-full flex items-center;
-
-  a {
-    @apply py-3 px-0;
-  }
-
-  &:hover {
-    @apply border-gray-600;
-  }
+.nav_link {
+    @apply ml-8 border-b-2 border-white h-full flex items-center;
+    a {
+        @apply py-10 px-5;
+    }
+    &:hover {
+        @apply border-gray-600;
+    }
 }
 
 .btn {
-  @apply w-11/12 border border-gray-800 font-bold text-gray-800 mb-2 text-center rounded-md py-2;
+    @apply text-center rounded-sm py-5 font-light text-lg w-full;
 }
 
 .btn-link {
-  @apply text-center py-3 rounded-lg font-light text-lg w-full text-white bg-red-500;
-}
-
-.auth-button {
-  transition: box-shadow 0.2s ease;
-  @apply bg-airbnb border-airbnb text-white;
-}
-
-.auth-button:hover {
-  box-shadow: 0 0 0 4px #ffffff, 0 0 0 5px #717171,
-    0 0 0 6px rgba(255, 255, 255, 0.5);
-}
-
-form {
-  .input {
-    @apply mb-2;
-  }
-}
-
-.input {
-  display: block;
-  transition: border-color 0.3s ease;
-  background-repeat: no-repeat;
-  background-position: 96%;
-  background-size: 16px 16px;
-
-  @apply rounded-sm py-2 font-light text-sm w-11/12 px-3 border border-gray-600;
-
-  &:focus {
-    @apply outline-none border-teal-500;
-  }
-}
-
-.btn-wrapper {
-  @apply flex flex-col w-full items-center;
-}
-
-textarea {
-  resize: none;
-  height: 100px;
-}
-
-select {
-  height: 50px;
+    @apply text-center py-3 rounded-lg font-light text-lg w-full text-white bg-red-500;
 }
 
 input,
 textarea,
 select {
-  @apply rounded-sm font-light text-lg w-full text-left border-none;
-
-  &:focus {
-    @apply outline-none;
-  }
-}
-
-input {
-  background-color: transparent;
-  font-size: 16px;
-}
-
-input[type='checkbox'] {
-  display: block;
-  width: auto;
+    @apply rounded-sm py-5 font-light text-lg w-full text-left border border-gray-600 px-5;
+    &:focus {
+        @apply outline-none border-teal-500
+    }
 }
 
 textarea {
-  resize: none;
-  height: 100px;
+    resize: none;
+    height: 100px;
 }
 
 select {
-  height: 50px;
+    height: 50px;
 }
 
-.input:focus-within {
-  @apply border-teal-400;
-}
-
-.input.email {
-  background-image: url('/static/img/email-input-icon.svg');
-}
-
-.input.password {
-  background-image: url('/static/img/password-input-icon.svg');
-}
-
-.input.password-check {
-  background-image: url('/static/img/password-check-input-icon.svg');
-}
-
-.input.first-name {
-  background-image: url('/static/img/first-name-icon.svg');
-}
-
-.input.last-name {
-  background-image: url('/static/img/last-name-icon.svg');
-}
-
-@screen md {
-  .btn {
-    @apply mb-3 w-10/12 py-3;
-  }
-
-  .input {
-    background-position: 97%;
-    background-size: 19px 19px;
-    @apply w-10/12 text-lg px-5 py-3;
-  }
-
-  form {
+form {
     .input {
-      @apply mb-3;
+        @apply mb-3 w-full;
+        &.has_error {
+            input {
+                @apply bg-red-200 border-gray-600;
+                &:focus {
+                    @apply border-gray-600;
+                }
+            }
+        }
     }
-  }
 }
 
 @keyframes messageFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
-  5% {
-    opacity: 1;
-    transform: translateY(50px);
-  }
-  95% {
-    opacity: 1;
-    transform: translateY(50px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
+    0% {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    5% {
+      opacity: 1;
+      transform: translateY(50px);
+    }
+    95% {
+      opacity: 1;
+      transform: translateY(50px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
 }
-
+  
 .message {
-  animation: messageFadeIn 5s ease-in-out forwards;
-
-  &.error {
-    @apply bg-red-600;
-  }
-  &.info {
-    @apply bg-blue-500;
-  }
-  &.success {
-    @apply bg-green-500;
-  }
-  &.warning {
-    @apply bg-yellow-400;
-  }
+    animation: messageFadeIn 5s ease-in-out forwards;
+    &.error {
+      @apply bg-red-600;
+    }
+    &.info {
+      @apply bg-blue-500;
+    }
+    &.success {
+      @apply bg-green-500;
+    }
+    &.warning {
+      @apply bg-yellow-400;
+    }
 }
 
 .border-section {
-  @apply border-b border-gray-400 pb-6 mt-6;
+    @apply border-b border-gray-400 pb-8 mt-8;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 10px;
+    justify-items: center;
+}
+
+.cal-number {
+    @apply w-full text-center rounded p-1 cursor-pointer;
 }
 
 @tailwind utilities;

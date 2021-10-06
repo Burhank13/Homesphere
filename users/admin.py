@@ -1,20 +1,14 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from users.models import User
+from django.contrib.auth.admin import UserAdmin
+from . import models
 
 
-@admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    """Register User model at admin panel
-    Set fieldsets BaseUserAdmin's fieldsets + user_fieldsets
-    
-    Inherit:
-        UserAdmin as BaseUserAdmin
+@admin.register(models.User)
+class CustomUserAdmin(UserAdmin):
 
-    user_fieldsets : Custom User model's fieldsets
-    """
+    """ Custom User Admin """
 
-    user_fieldsets = (
+    fieldsets = UserAdmin.fieldsets + (
         (
             "Custom Profile",
             {
@@ -22,18 +16,18 @@ class UserAdmin(BaseUserAdmin):
                     "avatar",
                     "gender",
                     "bio",
-                    "birth_date",
+                    "birthdate",
                     "language",
                     "currency",
-                    "is_superhost",
+                    "superhost",
+                    "email_verified",
                     "login_method",
                 )
             },
         ),
     )
-    fieldsets = BaseUserAdmin.fieldsets + user_fieldsets
 
-    list_filter = BaseUserAdmin.list_filter + ("is_superhost",)
+    list_filter = UserAdmin.list_filter + ("superhost",)
 
     list_display = (
         "username",
@@ -43,8 +37,11 @@ class UserAdmin(BaseUserAdmin):
         "is_active",
         "language",
         "currency",
-        "is_superhost",
+        "superhost",
         "is_staff",
         "is_superuser",
+        "email_verified",
+        "email_secret",
         "login_method",
     )
+

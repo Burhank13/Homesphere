@@ -1,74 +1,62 @@
-from core.management.commands.custom_command import CustomCommand
+import random
+from django.core.management.base import BaseCommand
 from django.contrib.admin.utils import flatten
 from django_seed import Seed
-from random import choice, randint
-from rooms.models import Room, RoomType, Photo, Amenity, Facility, HouseRule
-from users.models import User
+from rooms import models as room_models
+from users import models as user_models
 
 
-class Command(CustomCommand):
-    help = "Automatically create rooms"
+class Command(BaseCommand):
+
+    help = "This command creates amenities"
 
     def add_arguments(self, parser):
-        parser.add_argument("--number", default=1, help="Number of rooms to create")
+        parser.add_argument(
+            "--number", default=2, type=int, help="How many rooms you want to create"
+        )
 
     def handle(self, *args, **options):
-        try:
-            number = int(options.get("number"))
-
-            self.stdout.write(self.style.SUCCESS("■ START CREATE ROOMS"))
-
-            users = User.objects.all()
-            room_types = RoomType.objects.all()
-            amenities = Amenity.objects.all()
-            facilities = Facility.objects.all()
-            house_rules = HouseRule.objects.all()
-
-            seeder = Seed.seeder()
-            seeder.add_entity(
-                Room,
-                number,
-                {
-                    "name": lambda x: seeder.faker.address(),
-                    "host": lambda x: choice(users),
-                    "room_type": lambda x: choice(room_types),
-                    "price": lambda x: randint(1, 300),
-                    "guests": lambda x: randint(1, 10),
-                    "beds": lambda x: randint(1, 5),
-                    "bedrooms": lambda x: randint(1, 5),
-                    "baths": lambda x: randint(1, 5),
-                },
-            )
-            clean_pk_list = flatten(list(seeder.execute().values()))
-
-            for idx, pk in enumerate(clean_pk_list):
-                room = Room.objects.get(pk=pk)
-                BOOLEAN = [True, False]
-                self.progress_bar(
-                    idx + 1, number, prefix="■ PROGRESS", suffix="Complete", length=40
+        number = options.get("number")
+        seeder = Seed.seeder()
+        all_users = user_models.User.objects.all()
+        room_types = room_models.RoomType.objects.all()
+        seeder.add_entity(
+            room_models.Room,
+            number,
+            {
+                "name": lambda x: seeder.faker.address(),
+                "host": lambda x: random.choice(all_users),
+                "room_type": lambda x: random.choice(room_types),
+                "guests": lambda x: random.randint(1, 20),
+                "price": lambda x: random.randint(1, 300),
+                "beds": lambda x: random.randint(1, 5),
+                "bedrooms": lambda x: random.randint(1, 5),
+                "baths": lambda x: random.randint(1, 5),
+            },
+        )
+        created_photos = seeder.execute()
+        created_clean = flatten(list(created_photos.values()))
+        amenities = room_models.Amenity.objects.all()
+        facilities = room_models.Facility.objects.all()
+        rules = room_models.HouseRule.objects.all()
+        for pk in created_clean:
+            room = room_models.Room.objects.get(pk=pk)
+            for i in range(3, random.randint(10, 30)):
+                room_models.Photo.objects.create(
+                    caption=seeder.faker.sentence(),
+                    room=room,
+                    file=f"room_photos/{random.randint(1, 31)}.webp",
                 )
-
-                for i in range(randint(7, 27)):
-                    Photo.objects.create(
-                        caption=seeder.faker.sentence(),
-                        file=f"room_photos/{randint(1, 31)}.webp",
-                        room=room,
-                    )
-
-                for amenity in amenities:
-                    if choice(BOOLEAN):
-                        room.amenities.add(amenity)
-
-                for facility in facilities:
-                    if choice(BOOLEAN):
-                        room.facilities.add(facility)
-
-                for house_rule in house_rules:
-                    if choice(BOOLEAN):
-                        room.house_rules.add(house_rule)
-
-            self.stdout.write(self.style.SUCCESS("■ SUCCESS CREATE ALL ROOMS!"))
-
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"■ {e}"))
-            self.stdout.write(self.style.ERROR("■ FAIL CREATE ROOMS"))
+            for a in amenities:
+                magic_number = random.randint(0, 15)
+                if magic_number % 2 == 0:
+                    room.amenities.add(a)
+            for f in facilities:
+                magic_number = random.randint(0, 15)
+                if magic_number % 2 == 0:
+                    room.facilities.add(f)
+            for r in rules:
+                magic_number = random.randint(0, 15)
+                if magic_number % 2 == 0:
+                    room.house_rules.add(r)
+        self.stdout.write(self.style.SUCCESS(f"{number} rooms created!"))

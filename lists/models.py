@@ -1,28 +1,14 @@
 from django.db import models
-from core.models import AbstractTimeStamp
+from core import models as core_models
 
 
-class List(AbstractTimeStamp):
-    """List Model
+class List(core_models.TimeStampedModel):
 
-    Inherit:
-        AbstractTimeStamp
-
-    FIelds:
-        name       : CharField
-        user       : User Model (1:N)
-        rooms      : Room Model (N:N)
-        created_at : DateTimeField
-        updated_at : DateTimeField
-
-    Method:
-        __str__     : return name
-        count_rooms : return rooms count
-    """
+    """ List Model Definition """
 
     name = models.CharField(max_length=80)
-    user = models.ForeignKey(
-        "users.User", related_name="lists", on_delete=models.CASCADE
+    user = models.OneToOneField(
+        "users.User", related_name="list", on_delete=models.CASCADE
     )
     rooms = models.ManyToManyField("rooms.Room", related_name="lists", blank=True)
 
